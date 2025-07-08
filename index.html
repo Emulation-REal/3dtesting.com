@@ -403,7 +403,7 @@
 
     function checkBulletHit(b) {
       for (const id in remotePlayers) {
-        const p = remotePlayers[conn.peer];
+        const p = remotePlayers[id];
         if (b.position.distanceTo(p.mesh.position) < 1.5) {
           connections[id]?.send({ type: 'hit', damage: b.damage });
           score += 10;
@@ -429,7 +429,6 @@
       setTimeout(() => {
         isDead = false;
         health = 100;
-        healthDeque.getElementById("health");
         healthDisplay.textContent = health;
         let pos;
         do {
