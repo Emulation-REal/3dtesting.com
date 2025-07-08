@@ -4,54 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multiplayer FPS Game – Enhanced</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { margin: 0; overflow: hidden; background: #111; }
     canvas { display: block; }
-    #crosshair { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; color: rgba(255,255,255,0.8); pointer-events: none; z-index: 20; }
-    #chatInput { transition: all 0.3s ease; }
-    #modMenu { transition: all 0.3s ease; }
-    #mobileControls { display: none; }
+    #hud, #crosshair, #status, #playerList, #chat, #chatInput, #modMenu {
+      position: absolute;
+      font-family: 'Arial', sans-serif;
+      z-index: 10;
+      color: white;
+    }
+    #hud {
+      top: 10px; left: 10px; font-size: 18px;
+      display: flex; gap: 20px;
+    }
+    #crosshair {
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 20px; color: rgba(255,255,255,0.8);
+      pointer-events: none; z-index: 20;
+    }
+    #status {
+      top: 10px; right: 10px; font-size: 14px; color: yellow;
+      background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px;
+    }
+    #playerList {
+      top: 50px; right: 10px; font-size: 13px; color: lightgreen;
+      background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px;
+      max-width: 150px;
+    }
+    #chat {
+      bottom: 10px; left: 10px; width: 300px; max-height: 150px;
+      overflow-y: auto; background: rgba(0,0,0,0.7); padding: 10px;
+      border-radius: 6px; font-size: 14px; user-select: none;
+    }
+    #chatInput {
+      bottom: 170px; left: 10px; width: 300px; padding: 8px;
+      font-size: 14px; border-radius: 6px; border: none; outline: none;
+      background: rgba(255,255,255,0.9); color: black; display: none;
+      transition: all 0.3s ease;
+    }
+    #chatInput:focus {
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.5);
+    }
+    #modMenu {
+      top: 50px; left: 50px; background: rgba(0,0,0,0.8);
+      padding: 15px; border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 8px; display: none; z-index: 50; max-width: 300px;
+      transition: all 0.3s ease;
+    }
+    #modMenu label {
+      display: flex; align-items: center; gap: 8px; margin: 8px 0;
+    }
+    #modMenu input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: #3b82f6;
+    }
+    #modMenu input[type="range"] {
+      width: 100%; accent-color: #3b82f6;
+    }
+    #mobileControls {
+      display: none; bottom: 10px; right: 10px;
+      position: absolute; z-index: 20; display: flex;
+      flex-direction: column; gap: 10px;
+    }
+    #mobileControls button {
+      padding: 15px; border-radius: 50%; color: white;
+      border: none; font-size: 14px; cursor: pointer;
+      background: rgba(0,0,0,0.7);
+    }
+    #mobileControls #moveJoystick { background: #4b5563; }
+    #mobileControls #shootButton { background: #ef4444; }
+    #mobileControls #sprintButton { background: #3b82f6; }
     @media (max-width: 768px) {
-      #mobileControls { display: block; }
-      #chat { max-height: 100px; }
+      #mobileControls { display: flex; }
+      #chat { max-height: 100px; width: 250px; }
+      #chatInput { width: 250px; }
       #playerList { max-width: 100px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
-  <div id="hud" class="absolute top-4 left-4 text-white font-mono text-lg z-20 flex items-center space-x-4">
+  <div id="hud">
     <div>Health: <span id="health">100</span></div>
     <div>Score: <span id="score">0</span></div>
     <div>Weapon: <span id="weapon">Pistol</span></div>
   </div>
-  <div id="crosshair" class="absolute">+</div>
-  <div id="status" class="absolute top-4 right-4 text-yellow-300 text-sm bg-black/50 p-2 rounded-lg">Connecting...</div>
-  <div id="playerList" class="absolute top-16 right-4 text-green-300 text-sm bg-black/50 p-2 rounded-lg max-w-[150px]">Players:<br/></div>
-  <div id="chat" class="absolute bottom-4 left-4 w-80 max-h-[150px] overflow-y-auto bg-black/70 text-white p-3 rounded-lg text-sm font-mono"></div>
-  <input id="chatInput" type="text" placeholder="Type your message..." class="absolute bottom-20 left-4 w-80 bg-white/90 text-black p-2 rounded-lg hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
-  <div id="modMenu" class="absolute top-16 left-16 bg-black/80 text-white p-4 rounded-lg border-2 border-white/50 hidden z-50 max-w-sm">
-    <div class="text-lg font-bold mb-2">Mod Menu</div>
-    <label class="flex items-center space-x-2"><input type="checkbox" id="espToggle" class="form-checkbox text-blue-500"> <span>ESP (Wallhack)</span></label>
-    <label class="flex items-center space-x-2 mt-2"><input type="checkbox" id="tracersToggle" class="form-checkbox text-blue-500"> <span>Tracers</span></label>
-    <label class="flex items-center space-x-2 mt-2"><input type="checkbox" id="aimbotToggle" class="form-checkbox text-blue-500"> <span>Aimbot (Hold RMB)</span></label>
-    <label class="flex items-center space-x-2 mt-2"><input type="checkbox" id="triggerbotToggle" class="form-checkbox text-blue-500"> <span>Triggerbot</span></label>
-    <div class="mt-3">
-      <label class="block text-sm">Aimbot Sensitivity</label>
-      <input type="range" id="aimbotSensitivity" min="0.1" max="1" step="0.1" value="0.2" class="w-full">
+  <div id="crosshair">+</div>
+  <div id="status">Connecting...</div>
+  <div id="playerList">Players:<br/></div>
+  <div id="chat"></div>
+  <input id="chatInput" type="text" placeholder="Type your message...">
+  <div id="modMenu">
+    <strong style="font-size: 18px;">Mod Menu</strong><br>
+    <label><input type="checkbox" id="espToggle"> ESP (Wallhack)</label><br>
+    <label><input type="checkbox" id="tracersToggle"> Tracers</label><br>
+    <label><input type="checkbox" id="aimbotToggle"> Aimbot (Hold RMB)</label><br>
+    <label><input type="checkbox" id="triggerbotToggle"> Triggerbot</label><br>
+    <div style="margin-top: 10px;">
+      <label style="font-size: 14px;">Aimbot Sensitivity</label>
+      <input type="range" id="aimbotSensitivity" min="0.1" max="1" step="0.1" value="0.2">
     </div>
   </div>
-  <div id="mobileControls" class="absolute bottom-4 right-4 flex flex-col space-y-2 z-20">
-    <button id="moveJoystick" class="bg-gray-800 text-white p-4 rounded-full">Move</button>
-    <button id="shootButton" class="bg-red-500 text-white p-4 rounded-full">Shoot</button>
-    <button id="sprintButton" class="bg-blue-500 text-white p-4 rounded-full">Sprint</button>
+  <div id="mobileControls">
+    <button id="moveJoystick">Move</button>
+    <button id="shootButton">Shoot</button>
+    <button id="sprintButton">Sprint</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/PointerLockControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/+esm",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-  <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87ceeb);
     scene.fog = new THREE.Fog(0x87ceeb, 50, 100);
@@ -62,7 +131,7 @@
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    const controls = new THREE.PointerLockControls(camera, document.body);
+    const controls = new PointerLockControls(camera, document.body);
     document.body.addEventListener('click', () => controls.lock());
     scene.add(controls.getObject());
 
@@ -120,7 +189,7 @@
 
     const colors = [0x0055ff, 0xff3333, 0x33cc33, 0xffff33];
     const obstacles = [];
-    for (let i = 0; i = 0; i--) {
+    for (let i = 0; i < 15; i++) {
       const box = new THREE.Mesh(
         new THREE.BoxGeometry(5, 6, 2),
         new THREE.MeshStandardMaterial({
@@ -454,12 +523,12 @@
       updateESPAndTracers();
 
       if (mods.aimbot && isAiming) {
-        const best = Object.values(remotePlayers).reduce((best, rp) => {
-          const d = camera.position.distanceTo(rp.mesh.position);
-          return d < best.dist ? { rp, dist: d } : best;
-        }, { dist: Infinity, rp: null });
-        if (best.rp) {
-          const tgt = best.rp.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
+        const best = Object.values(remotePlayers).reduce((best, p) => {
+          const d = camera.position.distanceTo(p.mesh.position);
+          return d < best.dist ? { mesh: p, dist: d } : best;
+        }, { dist: Infinity, mesh: null });
+        if (best.mesh) {
+          const tgt = best.mesh.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
           const dirQ = tgt.sub(camera.position).normalize();
           const tq = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), dirQ);
           camera.quaternion.slerp(tq, mods.aimbotSensitivity);
@@ -468,12 +537,12 @@
       }
 
       if (mods.triggerbot && !isDead && chatInput.style.display !== "block") {
-        const best = Object.values(remotePlayers).reduce((best, rp) => {
-          const d = camera.position.distanceTo(rp.mesh.position);
-          return d < best.dist ? { rp, dist: d } : best;
-        }, { dist: Infinity, rp: null });
-        if (best.rp) {
-          const pos = best.rp.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
+        const best = Object.values(remotePlayers).reduce((best, p) => {
+          const d = camera.position.distanceTo(p.mesh.position);
+          return d < best.dist ? { mesh: p, dist: d } : best;
+        }, { dist: 2 });
+        if (best.mesh) {
+          const pos = best.mesh.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
           const vec = pos.project(camera);
           if (Math.abs(vec.x) < 0.05 && Math.abs(vec.y) < 0.05 && !triggerbotCooldown) {
             spawnBullet();
@@ -505,5 +574,6 @@
       if (e.key === 'Control') isCrouching = false;
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </body>
 </html>
