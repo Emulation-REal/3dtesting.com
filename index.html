@@ -3,81 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multiplayer FPS Game – Enhanced</title>
+  <title>Multiplayer FPS Arena</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { margin: 0; overflow: hidden; background: #111; }
     canvas { display: block; }
-    #hud, #crosshair, #status, #playerList, #chat, #chatInput, #modMenu {
-      position: absolute;
-      font-family: 'Arial', sans-serif;
-      z-index: 10;
-      color: white;
+    #hud, #crosshair, #status, #playerList, #chat, #chatInput, #modMenu, #pauseMenu, #minimap {
+      position: absolute; font-family: 'Orbitron', sans-serif; z-index: 10; color: white;
     }
     #hud {
-      top: 10px; left: 10px; font-size: 18px;
-      display: flex; gap: 20px;
+      top: 10px; left: 10px; font-size: 18px; display: flex; gap: 20px; align-items: center;
+      background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;
     }
     #crosshair {
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 20px; color: rgba(255,255,255,0.8);
-      pointer-events: none; z-index: 20;
+      top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px;
+      color: rgba(255,255,255,0.8); pointer-events: none; z-index: 20;
     }
     #status {
-      top: 10px; right: 10px; font-size: 14px; color: yellow;
-      background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px;
+      top: 10px; right: 10px; font-size: 14px; color: #ffd700;
+      background: rgba(0,0,0,0.6); padding: 8px; border-radius: 6px;
     }
     #playerList {
-      top: 50px; right: 10px; font-size: 13px; color: lightgreen;
-      background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px;
-      max-width: 150px;
+      top: 50px; right: 10px; font-size: 13px; color: #90ee90;
+      background: rgba(0,0,0,0.6); padding: 10px; border-radius: 6px; max-width: 200px;
     }
     #chat {
-      bottom: 10px; left: 10px; width: 300px; max-height: 150px;
-      overflow-y: auto; background: rgba(0,0,0,0.7); padding: 10px;
-      border-radius: 6px; font-size: 14px; user-select: none;
+      bottom: 10px; left: 10px; width: 320px; max-height: 160px; overflow-y: auto;
+      background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; font-size: 14px;
     }
     #chatInput {
-      bottom: 170px; left: 10px; width: 300px; padding: 8px;
-      font-size: 14px; border-radius: 6px; border: none; outline: none;
-      background: rgba(255,255,255,0.9); color: black; display: none;
-      transition: all 0.3s ease;
+      bottom: 180px; left: 10px; width: 320px; padding: 10px; font-size: 14px;
+      border-radius: 6px; border: none; outline: none; background: rgba(255,255,255,0.9);
+      color: black; display: none; transition: all 0.3s ease;
     }
-    #chatInput:focus {
-      box-shadow: 0 0 0 2px rgba(59,130,246,0.5);
-    }
+    #chatInput:focus { box-shadow: 0 0 0 3px rgba(59,130,246,0.5); }
     #modMenu {
-      top: 50px; left: 50px; background: rgba(0,0,0,0.8);
-      padding: 15px; border: 2px solid rgba(255,255,255,0.5);
-      border-radius: 8px; display: none; z-index: 50; max-width: 300px;
-      transition: all 0.3s ease;
+      top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9);
+      padding: 20px; border: 2px solid #3b82f6; border-radius: 12px; display: none;
+      z-index: 100; max-width: 400px; width: 90%; box-shadow: 0 0 20px rgba(59,130,246,0.3);
+      animation: fadeIn 0.3s ease;
     }
-    #modMenu label {
-      display: flex; align-items: center; gap: 8px; margin: 8px 0;
+    @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -60%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+    #modMenu h2 { font-size: 24px; color: #3b82f6; margin-bottom: 15px; text-align: center; }
+    #modMenu label { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 16px; }
+    #modMenu input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer; }
+    #modMenu input[type="range"], #modMenu input[type="color"] { width: 100%; accent-color: #3b82f6; }
+    #modMenu button { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; width: 100%; margin-top: 10px; }
+    #modMenu button:hover { background: #2563eb; }
+    #pauseMenu {
+      top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9);
+      padding: 20px; border: 2px solid #3b82f6; border-radius: 12px; display: none;
+      z-index: 100; max-width: 400px; width: 90%; box-shadow: 0 0 20px rgba(59,130,246,0.3);
+      animation: fadeIn 0.3s ease;
     }
-    #modMenu input[type="checkbox"] {
-      width: 16px; height: 16px; accent-color: #3b82f6;
+    #pauseMenu h2 { font-size: 24px; color: #3b82f6; margin-bottom: 15px; text-align: center; }
+    #pauseMenu label { display: block; margin: 10px 0; font-size: 16px; }
+    #pauseMenu input[type="range"] { width: 100%; accent-color: #3b82f6; }
+    #pauseMenu button { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; width: 100%; margin-top: 10px; }
+    #pauseMenu button:hover { background: #2563eb; }
+    #minimap {
+      bottom: 10px; right: 10px; width: 150px; height: 150px; background: rgba(0,0,0,0.5);
+      border-radius: 8px; overflow: hidden;
     }
-    #modMenu input[type="range"] {
-      width: 100%; accent-color: #3b82f6;
-    }
-    #mobileControls {
-      display: none; bottom: 10px; right: 10px;
-      position: absolute; z-index: 20; display: flex;
-      flex-direction: column; gap: 10px;
-    }
-    #mobileControls button {
-      padding: 15px; border-radius: 50%; color: white;
-      border: none; font-size: 14px; cursor: pointer;
-      background: rgba(0,0,0,0.7);
-    }
-    #mobileControls #moveJoystick { background: #4b5563; }
-    #mobileControls #shootButton { background: #ef4444; }
-    #mobileControls #sprintButton { background: #3b82f6; }
+    #minimap canvas { width: 100%; height: 100%; }
     @media (max-width: 768px) {
-      #mobileControls { display: flex; }
       #chat { max-height: 100px; width: 250px; }
       #chatInput { width: 250px; }
       #playerList { max-width: 100px; font-size: 12px; }
+      #minimap { width: 100px; height: 100px; }
     }
   </style>
 </head>
@@ -85,7 +78,8 @@
   <div id="hud">
     <div>Health: <span id="health">100</span></div>
     <div>Score: <span id="score">0</span></div>
-    <div>Weapon: <span id="weapon">Pistol</span></div>
+    <div>K/D: <span id="kd">0/0</span></div>
+    <div>Weapon: <span id="weapon">Pistol</span> (<span id="ammo">30</span>)</div>
   </div>
   <div id="crosshair">+</div>
   <div id="status">Connecting...</div>
@@ -93,21 +87,26 @@
   <div id="chat"></div>
   <input id="chatInput" type="text" placeholder="Type your message...">
   <div id="modMenu">
-    <strong style="font-size: 18px;">Mod Menu</strong><br>
-    <label><input type="checkbox" id="espToggle"> ESP (Wallhack)</label><br>
-    <label><input type="checkbox" id="tracersToggle"> Tracers</label><br>
-    <label><input type="checkbox" id="aimbotToggle"> Aimbot (Hold RMB)</label><br>
-    <label><input type="checkbox" id="triggerbotToggle"> Triggerbot</label><br>
-    <div style="margin-top: 10px;">
-      <label style="font-size: 14px;">Aimbot Sensitivity</label>
-      <input type="range" id="aimbotSensitivity" min="0.1" max="1" step="0.1" value="0.2">
-    </div>
+    <h2>Mod Menu (Press ; to Toggle)</h2>
+    <label><input type="checkbox" id="espToggle"> ESP (Wallhack)</label>
+    <label><input type="checkbox" id="tracersToggle"> Tracers</label>
+    <label><input type="checkbox" id="aimbotToggle"> Aimbot (Hold RMB)</label>
+    <label><input type="checkbox" id="triggerbotToggle"> Triggerbot</label>
+    <label><input type="checkbox" id="speedHackToggle"> Speed Hack</label>
+    <label><input type="checkbox" id="infiniteAmmoToggle"> Infinite Ammo</label>
+    <label>Aimbot Sensitivity<input type="range" id="aimbotSensitivity" min="0.1" max="1" step="0.1" value="0.2"></label>
+    <label>ESP Color (Colorblind Mode)<input type="color" id="espColor" value="#00ff00"></label>
+    <button id="closeModMenu">Close</button>
   </div>
-  <div id="mobileControls">
-    <button id="moveJoystick">Move</button>
-    <button id="shootButton">Shoot</button>
-    <button id="sprintButton">Sprint</button>
+  <div id="pauseMenu">
+    <h2>Pause Menu</h2>
+    <label>Mouse Sensitivity<input type="range" id="mouseSensitivity" min="0.1" max="2" step="0.1" value="1"></label>
+    <label>Gamepad Sensitivity<input type="range" id="gamepadSensitivity" min="0.01" max="0.1" step="0.01" value="0.05"></label>
+    <label>Volume<input type="range" id="volume" min="0" max="1" step="0.1" value="0.5"></label>
+    <button id="resumeGame">Resume</button>
+    <button id="restartGame">Restart</button>
   </div>
+  <div id="minimap"><canvas id="minimapCanvas"></canvas></div>
 
   <script type="importmap">
     {
@@ -120,9 +119,14 @@
   <script type="module">
     import * as THREE from 'three';
     import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb);
+    scene.background = new THREE.CubeTextureLoader()
+      .setPath('https://threejs.org/examples/textures/cube/skybox/')
+      .load(['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg']);
     scene.fog = new THREE.Fog(0x87ceeb, 50, 100);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -131,40 +135,60 @@
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
+    // Post-processing
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0.4, 0.85);
+    composer.addPass(bloomPass);
+
     const controls = new PointerLockControls(camera, document.body);
     document.body.addEventListener('click', () => controls.lock());
     scene.add(controls.getObject());
 
-    let health = 100, score = 0, isDead = false, isSprinting = false, isCrouching = false;
-    let velocityY = 0, isJumping = false, shootCooldown = 0, triggerbotCooldown = 0;
+    let health = 100, score = 0, kills = 0, deaths = 0, isDead = false, isSprinting = false, isCrouching = false, isSliding = false;
+    let velocityY = 0, isJumping = false, shootCooldown = 0, triggerbotCooldown = 0, reloadTime = 0, slideTime = 0;
+    let lastPosition = new THREE.Vector3();
     const healthDisplay = document.getElementById("health");
     const scoreDisplay = document.getElementById("score");
+    const kdDisplay = document.getElementById("kd");
     const weaponDisplay = document.getElementById("weapon");
+    const ammoDisplay = document.getElementById("ammo");
     const statusDisplay = document.getElementById("status");
     const playerListDisplay = document.getElementById("playerList");
     const chatDisplay = document.getElementById("chat");
     const chatInput = document.getElementById("chatInput");
     const modMenu = document.getElementById("modMenu");
-    const keys = {};
-    let mods = { tracers: false, aimbot: false, esp: false, triggerbot: false, aimbotSensitivity: 0.2 };
+    const pauseMenu = document.getElementById("pauseMenu");
+    const minimapCanvas = document.getElementById("minimapCanvas");
+    const minimapCtx = minimapCanvas.getContext('2d');
+    let mods = { tracers: false, aimbot: false, esp: false, triggerbot: false, speedHack: false, infiniteAmmo: false, aimbotSensitivity: 0.2, espColor: 0x00ff00 };
+    let mouseSensitivity = 1, gamepadSensitivity = 0.05, volume = 0.5;
 
     // Audio setup
     const listener = new THREE.AudioListener();
     camera.add(listener);
     const shootSound = new THREE.Audio(listener);
+    const footstepSound = new THREE.Audio(listener);
     const audioLoader = new THREE.AudioLoader();
     audioLoader.load('https://threejs.org/examples/sounds/shot.wav', buffer => {
       shootSound.setBuffer(buffer);
-      shootSound.setVolume(0.5);
+      shootSound.setVolume(0.5 * volume);
+    });
+    audioLoader.load('https://threejs.org/examples/sounds/footstep.wav', buffer => {
+      footstepSound.setBuffer(buffer);
+      footstepSound.setLoop(true);
+      footstepSound.setVolume(0.3 * volume);
     });
 
     // Weapons
     const weapons = {
-      pistol: { damage: 25, cooldown: 15, bulletSpeed: 0.5 },
-      rifle: { damage: 40, cooldown: 10, bulletSpeed: 0.7 },
-      shotgun: { damage: 60, cooldown: 30, bulletSpeed: 0.4, spread: 0.1 }
+      pistol: { damage: 25, cooldown: 15, bulletSpeed: 0.5, ammo: 30, maxAmmo: 30, reloadTime: 1000, recoil: 0.05 },
+      rifle: { damage: 40, cooldown: 10, bulletSpeed: 0.7, ammo: 50, maxAmmo: 50, reloadTime: 1500, recoil: 0.03 },
+      shotgun: { damage: 60, cooldown: 30, bulletSpeed: 0.4, spread: 0.1, ammo: 8, maxAmmo: 8, reloadTime: 2000, recoil: 0.1 }
     };
     let currentWeapon = 'pistol';
+    ammoDisplay.textContent = weapons[currentWeapon].ammo;
 
     // Lighting
     scene.add(new THREE.AmbientLight(0x404040, 0.5));
@@ -179,7 +203,7 @@
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(200, 200),
       new THREE.MeshStandardMaterial({
-        map: textureLoader.load('https://threejs.org/examples/textures/grass.jpg'),
+        map: textureLoader.load('https://threejs.org/examples/textures/grass.jpg', t => t.repeat.set(10, 10)),
         roughness: 0.8
       })
     );
@@ -187,22 +211,41 @@
     floor.receiveShadow = true;
     scene.add(floor);
 
-    const colors = [0x0055ff, 0xff3333, 0x33cc33, 0xffff33];
+    // Instanced obstacles
+    const obstacleGeometry = new THREE.BoxGeometry(5, 6, 2);
+    const obstacleMaterial = new THREE.MeshStandardMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg') });
+    const obstacleMesh = new THREE.InstancedMesh(obstacleGeometry, obstacleMaterial, 15);
     const obstacles = [];
+    const matrix = new THREE.Matrix4();
+    const colors = [0x0055ff, 0xff3333, 0x33cc33, 0xffff33];
     for (let i = 0; i < 15; i++) {
-      const box = new THREE.Mesh(
-        new THREE.BoxGeometry(5, 6, 2),
-        new THREE.MeshStandardMaterial({
-          map: textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg'),
-          color: colors[i % colors.length]
-        })
-      );
-      box.position.set((Math.random() - 0.5) * 100, 3, (Math.random() - 0.5) * 100);
-      box.castShadow = true;
-      box.receiveShadow = true;
-      scene.add(box);
-      obstacles.push(box);
+      matrix.setPosition((Math.random() - 0.5) * 100, 3, (Math.random() - 0.5) * 100);
+      obstacleMesh.setMatrixAt(i, matrix);
+      obstacleMesh.setColorAt(i, new THREE.Color(colors[i % colors.length]));
+      obstacles.push({ position: new THREE.Vector3().setFromMatrixPosition(matrix) });
     }
+    obstacleMesh.castShadow = true;
+    obstacleMesh.receiveShadow = true;
+    scene.add(obstacleMesh);
+
+    // Power-ups
+    const powerUps = [];
+    function spawnPowerUp(type) {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshStandardMaterial({ color: type === 'health' ? 0xff0000 : 0x0000ff, emissive: 0xaaaaaa });
+      const powerUp = new THREE.Mesh(geometry, material);
+      let pos;
+      do {
+        pos = new THREE.Vector3((Math.random() - 0.5) * 100, 1, (Math.random() - 0.5) * 100);
+      } while (collides(pos));
+      powerUp.position.copy(pos);
+      powerUp.type = type;
+      scene.add(powerUp);
+      powerUps.push(powerUp);
+    }
+    setInterval(() => {
+      if (powerUps.length < 3) spawnPowerUp(Math.random() > 0.5 ? 'health' : 'speed');
+    }, 10000);
 
     function collides(pos) {
       return obstacles.some(o =>
@@ -220,8 +263,8 @@
     const connections = {}, remotePlayers = {};
 
     function updatePlayerList() {
-      let html = `Players (${Object.keys(remotePlayers).length + 1}):<br>You (${score})<br>`;
-      for (const id in remotePlayers) html += `${id} (${remotePlayers[id].score || 0})<br>`;
+      let html = `Players (${Object.keys(remotePlayers).length + 1}):<br>You (${kills}/${deaths})<br>`;
+      for (const id in remotePlayers) html += `${id} (${remotePlayers[id].kills}/${remotePlayers[id].deaths})<br>`;
       playerListDisplay.innerHTML = html;
     }
 
@@ -229,7 +272,7 @@
       const group = new THREE.Group();
       const body = new THREE.Mesh(
         new THREE.BoxGeometry(1, 2, 1),
-        new THREE.MeshStandardMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/metal.jpg') })
+        new THREE.MeshStandardMaterial({ map: textureLoader.load('https://threejs.org/examples/textures/metal.jpg'), color: 0xaaaaaa })
       );
       body.position.y = 1;
       const head = new THREE.Mesh(
@@ -255,11 +298,13 @@
           if (!remotePlayers[conn.peer]) {
             const mesh = createRemoteMesh();
             scene.add(mesh);
-            remotePlayers[conn.peer] = { mesh, health: 100, score: 0 };
+            remotePlayers[conn.peer] = { mesh, health: 100, score: 0, kills: 0, deaths: 0, lastPosition: new THREE.Vector3() };
             updatePlayerList();
           }
-          remotePlayers[conn.peer].mesh.position.set(data.x, data.y, data.z);
-          remotePlayers[conn.peer].mesh.rotation.y = data.rotationY;
+          const p = remotePlayers[conn.peer];
+          p.mesh.position.set(data.x, data.y, data.z);
+          p.mesh.rotation.y = data.rotationY;
+          p.lastPosition.set(data.x, data.y, data.z);
         } else if (data.type === 'hit') {
           health -= data.damage;
           if (health <= 0) dieAndRespawn();
@@ -268,6 +313,8 @@
           addChatMessage(conn.peer, data.message);
         } else if (data.type === 'score') {
           remotePlayers[conn.peer].score = data.score;
+          remotePlayers[conn.peer].kills = data.kills;
+          remotePlayers[conn.peer].deaths = data.deaths;
           updatePlayerList();
         }
       });
@@ -283,9 +330,14 @@
 
     function startPeerAsHost() {
       peer = new Peer(ROOM_ID, { debug: 2 });
-      peer.on('open', () => { statusDisplay.textContent = "Connected as Host"; isHost = true; });
+      peer.on('open', () => {
+        statusDisplay.textContent = "Connected as Host";
+        isHost = true;
+      });
       peer.on('connection', setupConnection);
-      peer.on('error', err => { if (err.type === 'unavailable-id') startPeerAsClient(); });
+      peer.on('error', err => {
+        if (err.type === 'unavailable-id') startPeerAsClient();
+      });
     }
 
     function startPeerAsClient() {
@@ -295,6 +347,7 @@
         const conn = peer.connect(ROOM_ID);
         conn.on('open', () => setupConnection(conn));
       });
+      peer.on('error', () => setTimeout(startPeerAsClient, 5000)); // Reconnect on error
     }
 
     startPeerAsHost();
@@ -309,9 +362,12 @@
 
     const bullets = [];
     function spawnBullet() {
+      if (reloadTime > 0 || weapons[currentWeapon].ammo <= 0) return;
       if (shootSound.isPlaying) shootSound.stop();
       shootSound.play();
       const weapon = weapons[currentWeapon];
+      if (!mods.infiniteAmmo) weapon.ammo--;
+      ammoDisplay.textContent = weapon.ammo;
       const bullet = new THREE.Mesh(
         new THREE.SphereGeometry(0.1),
         new THREE.MeshBasicMaterial({ color: 0xff0000 })
@@ -330,17 +386,32 @@
       scene.add(bullet);
       bullets.push(bullet);
       shootCooldown = weapon.cooldown;
+      // Recoil
+      camera.rotation.x += weapon.recoil * (Math.random() - 0.5);
+      camera.rotation.y += weapon.recoil * (Math.random() - 0.5);
+    }
+
+    function reloadWeapon() {
+      if (reloadTime > 0) return;
+      reloadTime = weapons[currentWeapon].reloadTime;
+      setTimeout(() => {
+        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
+        ammoDisplay.textContent = weapons[currentWeapon].ammo;
+        reloadTime = 0;
+      }, reloadTime);
     }
 
     function checkBulletHit(b) {
       for (const id in remotePlayers) {
-        const p = remotePlayers[id];
+        const p = remotePlayers[conn.peer];
         if (b.position.distanceTo(p.mesh.position) < 1.5) {
           connections[id]?.send({ type: 'hit', damage: b.damage });
           score += 10;
+          kills++;
+          kdDisplay.textContent = `${kills}/${deaths}`;
           scoreDisplay.textContent = score;
           for (const id in connections) {
-            if (connections[id].open) connections[id].send({ type: 'score', score });
+            if (connections[id].open) connections[id].send({ type: 'score', score, kills, deaths });
           }
           return true;
         }
@@ -351,42 +422,87 @@
     function dieAndRespawn() {
       isDead = true;
       health = 0;
+      deaths++;
+      kdDisplay.textContent = `${kills}/${deaths}`;
       healthDisplay.textContent = "DEAD";
       controls.getObject().position.set(999, 999, 999);
       setTimeout(() => {
         isDead = false;
         health = 100;
+        healthDeque.getElementById("health");
         healthDisplay.textContent = health;
         let pos;
         do {
-          pos = new THREE.Vector3(Math.random() * 20 - 10, 1.6, Math.random() * 20 - 10);
+          pos = new THREE.Vector3((Math.random() - 0.5) * 20, 1.6, (Math.random() - 0.5) * 20);
         } while (collides(pos));
         controls.getObject().position.copy(pos);
+        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
+        ammoDisplay.textContent = weapons[currentWeapon].ammo;
       }, 3000);
     }
 
-    // Mod menu
-    ["esp", "tracers", "aimbot", "triggerbot"].forEach(name => {
+    // Mod menu controls
+    ["esp", "tracers", "aimbot", "triggerbot", "speedHack", "infiniteAmmo"].forEach(name => {
       const el = document.getElementById(name + "Toggle");
       el.onchange = e => mods[name] = e.target.checked;
     });
     document.getElementById("aimbotSensitivity").onchange = e => mods.aimbotSensitivity = parseFloat(e.target.value);
+    document.getElementById("espColor").onchange = e => mods.espColor = parseInt(e.target.value.replace('#', '0x'));
+    document.getElementById("closeModMenu").onclick = () => modMenu.style.display = "none";
+
+    // Pause menu controls
+    document.getElementById("mouseSensitivity").onchange = e => mouseSensitivity = parseFloat(e.target.value);
+    document.getElementById("gamepadSensitivity").onchange = e => gamepadSensitivity = parseFloat(e.target.value);
+    document.getElementById("volume").onchange = e => {
+      volume = parseFloat(e.target.value);
+      shootSound.setVolume(0.5 * volume);
+      footstepSound.setVolume(0.3 * volume);
+    };
+    document.getElementById("resumeGame").onclick = () => {
+      pauseMenu.style.display = "none";
+      controls.lock();
+    };
+    document.getElementById("restartGame").onclick = () => {
+      health = 100; score = 0; kills = 0; deaths = 0; isDead = false;
+      healthDisplay.textContent = health;
+      scoreDisplay.textContent = score;
+      kdDisplay.textContent = `${kills}/${deaths}`;
+      controls.getObject().position.set(0, 1.6, 10);
+      pauseMenu.style.display = "none";
+      controls.lock();
+    };
+
+    const keys = {};
     document.addEventListener('keydown', e => {
       keys[e.code] = true;
       if (e.key === ';') {
         modMenu.style.display = modMenu.style.display === "none" ? "block" : "none";
+        controls.unlock();
       } else if (e.key === '/') {
         e.preventDefault();
         chatInput.style.display = "block";
         chatInput.focus();
+        controls.unlock();
       } else if (e.key === 'Escape') {
         chatInput.value = "";
         chatInput.style.display = "none";
-        controls.lock();
-      } else if (e.key === '1') currentWeapon = 'pistol';
-      else if (e.key === '2') currentWeapon = 'rifle';
-      else if (e.key === '3') currentWeapon = 'shotgun';
-      weaponDisplay.textContent = currentWeapon.charAt(0).toUpperCase() + currentWeapon.slice(1);
+        pauseMenu.style.display = pauseMenu.style.display === "none" ? "block" : "none";
+        controls.unlock();
+      } else if (e.key === '1') {
+        currentWeapon = 'pistol';
+        weaponDisplay.textContent = 'Pistol';
+        ammoDisplay.textContent = weapons[currentWeapon].ammo;
+      } else if (e.key === '2') {
+        currentWeapon = 'rifle';
+        weaponDisplay.textContent = 'Rifle';
+        ammoDisplay.textContent = weapons[currentWeapon].ammo;
+      } else if (e.key === '3') {
+        currentWeapon = 'shotgun';
+        weaponDisplay.textContent = 'Shotgun';
+        ammoDisplay.textContent = weapons[currentWeapon].ammo;
+      } else if (e.key === 'r') {
+        reloadWeapon();
+      }
     });
     document.addEventListener('keyup', e => keys[e.code] = false);
     chatInput.addEventListener('keydown', e => {
@@ -413,7 +529,7 @@
       for (const id in remotePlayers) {
         const enemy = remotePlayers[id];
         if (mods.esp) {
-          const box = new THREE.BoxHelper(enemy.mesh, 0x00ff00);
+          const box = new THREE.BoxHelper(enemy.mesh, mods.espColor);
           box.material.depthTest = false;
           box.renderOrder = 999;
           espBoxes.push(box);
@@ -422,7 +538,7 @@
         if (mods.tracers) {
           const endpoint = enemy.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
           const lineGeo = new THREE.BufferGeometry().setFromPoints([eye, endpoint]);
-          const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, depthTest: false });
+          const lineMat = new THREE.LineBasicMaterial({ color: mods.espColor, depthTest: false });
           const line = new THREE.Line(lineGeo, lineMat);
           line.renderOrder = 998;
           tracerLines.push(line);
@@ -432,46 +548,71 @@
     }
 
     let isAiming = false;
-    document.addEventListener('mousedown', e => { if (e.button === 2) isAiming = true; });
+    document.addEventListener('mousedown', e => {
+      if (e.button === 2) isAiming = true;
+      if (e.button === 0 && !isDead && chatInput.style.display !== "block" && modMenu.style.display !== "block" && pauseMenu.style.display !== "block" && shootCooldown === 0) spawnBullet();
+    });
     document.addEventListener('mouseup', e => { if (e.button === 2) isAiming = false; });
-    document.addEventListener('click', () => {
-      if (!isDead && chatInput.style.display !== "block" && shootCooldown === 0) spawnBullet();
-    });
-
-    // Mobile controls
-    const moveJoystick = document.getElementById("moveJoystick");
-    const shootButton = document.getElementById("shootButton");
-    const sprintButton = document.getElementById("sprintButton");
-    let joystickActive = false;
-    moveJoystick.addEventListener('touchstart', () => joystickActive = true);
-    moveJoystick.addEventListener('touchend', () => joystickActive = false);
-    shootButton.addEventListener('touchstart', () => {
-      if (!isDead && chatInput.style.display !== "block" && shootCooldown === 0) spawnBullet();
-    });
-    sprintButton.addEventListener('touchstart', () => isSprinting = true);
-    sprintButton.addEventListener('touchend', () => isSprinting = false);
 
     // Gamepad
     let gamepadConnected = false;
-    const lookSpeed = 0.05;
     window.addEventListener("gamepadconnected", () => gamepadConnected = true);
     window.addEventListener("gamepaddisconnected", () => gamepadConnected = false);
 
     function applyGamepadLook(gp) {
-      const rx = gp.axes[2] * lookSpeed;
-      const ry = gp.axes[3] * lookSpeed;
-      controls.getObject().rotation.y -= rx;
-      camera.rotation.x -= ry;
+      const rx = gp.axes[2] * gamepadSensitivity;
+      const ry = gp.axes[3] * gamepadSensitivity;
+      controls.getObject().rotation.y -= rx * mouseSensitivity;
+      camera.rotation.x -= ry * mouseSensitivity;
       camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+    }
+
+    // Minimap
+    function updateMinimap() {
+      minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+      minimapCtx.fillStyle = 'rgba(0,0,0,0.5)';
+      minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+      const scale = minimapCanvas.width / 200;
+      minimapCtx.fillStyle = '#ffffff';
+      minimapCtx.fillRect(
+        (controls.getObject().position.x + 100) * scale - 2,
+        (controls.getObject().position.z + 100) * scale - 2,
+        4, 4
+      );
+      for (const id in remotePlayers) {
+        const p = remotePlayers[id];
+        minimapCtx.fillStyle = '#ff0000';
+        minimapCtx.fillRect(
+          (p.mesh.position.x + 100) * scale - 2,
+          (p.mesh.position.z + 100) * scale - 2,
+          4, 4
+        );
+      }
+      obstacles.forEach(o => {
+        minimapCtx.fillStyle = '#888888';
+        minimapCtx.fillRect(
+          (o.position.x + 100) * scale - 2,
+          (o.position.z + 100) * scale - 2,
+          4, 4
+        );
+      });
+      powerUps.forEach(p => {
+        minimapCtx.fillStyle = p.type === 'health' ? '#ff0000' : '#0000ff';
+        minimapCtx.fillRect(
+          (p.position.x + 100) * scale - 2,
+          (p.position.z + 100) * scale - 2,
+          4, 4
+        );
+      });
     }
 
     function animate() {
       requestAnimationFrame(animate);
 
-      const gp = (gamepadConnected ? navigator.getGamepads()[0] : null);
-      if (!isDead && chatInput.style.display !== "block") {
+      const gp = gamepadConnected ? navigator.getGamepads()[0] : null;
+      if (!isDead && chatInput.style.display !== "block" && modMenu.style.display !== "block" && pauseMenu.style.display !== "block") {
         const dir = new THREE.Vector3();
-        if (keys.KeyW || joystickActive) dir.z -= 1;
+        if (keys.KeyW) dir.z -= 1;
         if (keys.KeyS) dir.z += 1;
         if (keys.KeyA) dir.x -= 1;
         if (keys.KeyD) dir.x += 1;
@@ -481,12 +622,22 @@
         }
         dir.normalize().applyQuaternion(camera.quaternion);
         dir.y = 0;
-        const speed = isSprinting ? 0.3 : isCrouching ? 0.1 : 0.2;
+        const speed = (mods.speedHack ? 0.5 : isSprinting ? 0.3 : isCrouching ? 0.1 : 0.2) * (isSliding ? 1.5 : 1);
         const next = controls.getObject().position.clone().add(dir.multiplyScalar(speed));
+
+        // Wall-jumping and sliding
         if ((keys.Space || (gp && gp.buttons[0].pressed)) && !isJumping) {
           velocityY = 0.2;
           isJumping = true;
+          if (collides(next)) velocityY = 0.3; // Wall jump
         }
+        if (keys.Shift && keys.Control && !isSliding && dir.length() > 0) {
+          isSliding = true;
+          slideTime = 30;
+        }
+        if (slideTime > 0) slideTime--;
+        else isSliding = false;
+
         velocityY -= 0.01;
         next.y += velocityY;
         const height = isCrouching ? 1.2 : 1.6;
@@ -498,16 +649,37 @@
         if (!collides(next)) controls.getObject().position.copy(next);
         camera.position.y = height;
 
-        for (const id in connections) {
-          const conn = connections[id];
-          if (conn.open) {
-            const p = controls.getObject().position;
-            conn.send({ type: 'position', x: p.x, y: p.y, z: p.z, rotationY: controls.getObject().rotation.y });
+        // Footsteps
+        if (dir.length() > 0 && !footstepSound.isPlaying && !isDead) footstepSound.play();
+        else if (dir.length() === 0 && footstepSound.isPlaying) footstepSound.stop();
+
+        // Send position delta
+        if (controls.getObject().position.distanceTo(lastPosition) > 0.1) {
+          for (const id in connections) {
+            const conn = connections[id];
+            if (conn.open) {
+              const p = controls.getObject().position;
+              conn.send({ type: 'position', x: p.x, y: p.y, z: p.z, rotationY: controls.getObject().rotation.y });
+            }
           }
+          lastPosition.copy(controls.getObject().position);
         }
 
         if (gp) applyGamepadLook(gp);
+      } else {
+        if (footstepSound.isPlaying) footstepSound.stop();
       }
+
+      // Power-up collection
+      powerUps.forEach((p, i) => {
+        if (controls.getObject().position.distanceTo(p.position) < 1.5) {
+          if (p.type === 'health') health = Math.min(health + 50, 100);
+          else if (p.type === 'speed') mods.speedHack = true;
+          scene.remove(p);
+          powerUps.splice(i, 1);
+          setTimeout(() => mods.speedHack = false, 5000);
+        }
+      });
 
       bullets.forEach((b, i) => {
         b.position.add(b.direction.clone().multiplyScalar(b.speed));
@@ -521,6 +693,7 @@
       });
 
       updateESPAndTracers();
+      updateMinimap();
 
       if (mods.aimbot && isAiming) {
         const best = Object.values(remotePlayers).reduce((best, p) => {
@@ -536,24 +709,26 @@
         }
       }
 
-      if (mods.triggerbot && !isDead && chatInput.style.display !== "block") {
+      if (mods.triggerbot && !isDead && chatInput.style.display !== "block" && modMenu.style.display !== "block" && pauseMenu.style.display !== "block") {
         const best = Object.values(remotePlayers).reduce((best, p) => {
           const d = camera.position.distanceTo(p.mesh.position);
           return d < best.dist ? { mesh: p, dist: d } : best;
-        }, { dist: 2 });
+        }, { dist: Infinity, mesh: null });
         if (best.mesh) {
           const pos = best.mesh.mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
           const vec = pos.project(camera);
-          if (Math.abs(vec.x) < 0.05 && Math.abs(vec.y) < 0.05 && !triggerbotCooldown) {
+          if (Math.abs(vec.x) < 0.05 && Math.abs(vec.y) < 0.05 && !triggerbotCooldown && shootCooldown === 0) {
             spawnBullet();
             triggerbotCooldown = weapons[currentWeapon].cooldown;
           }
         }
       }
+
       if (triggerbotCooldown) triggerbotCooldown--;
       if (shootCooldown) shootCooldown--;
+      if (reloadTime) reloadTime--;
 
-      renderer.render(scene, camera);
+      composer.render();
       healthDisplay.textContent = isDead ? "DEAD" : health;
     }
 
@@ -563,6 +738,7 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     });
 
     document.addEventListener('keydown', e => {
